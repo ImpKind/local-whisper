@@ -1,68 +1,83 @@
 # 🎤 Local Whisper
 
 [![ClawdHub](https://img.shields.io/badge/ClawdHub-whisper--mlx--local-orange)](https://clawdhub.com/skills/whisper-mlx-local)
+[![GitHub](https://img.shields.io/badge/GitHub-ImpKind%2Flocal--whisper-blue?logo=github)](https://github.com/ImpKind/local-whisper)
 
-Fast, free, private speech-to-text using MLX Whisper on Apple Silicon.
+**Free replacement for OpenAI Whisper API.** 
 
-## Features
+Runs 100% locally on your Mac. No API keys, no costs, no data leaving your machine.
 
-- **100% Local** — No cloud, no API keys, no costs
-- **Private** — Audio never leaves your machine
-- **Fast** — MLX optimized for Apple Silicon (2-3s for voice messages)
-- **Multilingual** — 99 languages + translation to English
-- **Daemon Mode** — Pre-loaded model for instant transcription
+## Why Use This?
 
-## Installation
+| | OpenAI API | This Skill |
+|---|------------|------------|
+| **Cost** | $0.006/min | **Free** |
+| **Privacy** | Sent to cloud | **Stays local** |
+| **Speed** | Network + processing | **~1 second** |
+| **API Key** | Required | **Not needed** |
 
-```bash
-# Via ClawdHub
-clawdhub install whisper-mlx-local
-
-# Or manually
-git clone https://github.com/ImpKind/whisper-mlx-local
-cd whisper-mlx-local
-pip3 install -r requirements.txt
-```
-
-## Usage
-
-```bash
-# Quick transcription
-./scripts/transcribe.sh recording.mp3
-
-# With translation to English
-./scripts/transcribe.sh recording.mp3 --translate
-
-# Large files (uses larger model)
-./scripts/transcribe_large.sh long_recording.mp3
-```
-
-## Daemon Mode
-
-For fast repeated transcription, run the daemon:
-
-```bash
-python3 scripts/daemon.py
-```
-
-The daemon pre-loads the model and serves HTTP at `localhost:8787`.
-
-### Auto-start on Login
-
-```bash
-cp com.whisper-mlx-local.plist ~/Library/LaunchAgents/
-launchctl load ~/Library/LaunchAgents/com.whisper-mlx-local.plist
-```
+Same Whisper model, zero cost.
 
 ## Requirements
 
 - **macOS** with Apple Silicon (M1/M2/M3/M4)
 - **Python 3.9+**
-- **~2GB RAM** for the medium model
+
+## Installation
+
+```bash
+# Clone
+git clone https://github.com/ImpKind/local-whisper
+cd local-whisper
+
+# Install dependencies
+pip3 install -r requirements.txt
+```
+
+## Usage
+
+### Start the Daemon (Recommended)
+
+The daemon pre-loads the model for instant transcription:
+
+```bash
+python3 scripts/daemon.py
+```
+
+Then transcribe:
+
+```bash
+./scripts/transcribe.sh recording.mp3
+```
+
+### Auto-Start on Login
+
+```bash
+cp com.local-whisper.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.local-whisper.plist
+```
+
+### Translate to English
+
+```bash
+./scripts/transcribe.sh audio_german.mp3 --translate
+```
+
+## API
+
+When daemon is running at `localhost:8787`:
+
+```bash
+curl -X POST http://localhost:8787/transcribe -F "file=@audio.mp3"
+```
+
+```json
+{"text": "transcribed text", "language": "en"}
+```
 
 ## How It Works
 
-Uses [MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) — Apple's machine learning framework optimized for Apple Silicon. Models run on the Neural Engine and GPU for maximum speed.
+Uses [MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) optimized for Apple Silicon. The model runs on Neural Engine + GPU.
 
 ## License
 
@@ -70,4 +85,4 @@ MIT
 
 ---
 
-*Free as in freedom. Free as in beer. 🍺*
+*Free as in freedom. Free as in beer.* 🍺

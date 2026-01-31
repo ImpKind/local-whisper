@@ -1,10 +1,10 @@
 ---
 name: local-whisper
-description: "Fast local speech-to-text using MLX Whisper on Apple Silicon. Free, private, no API costs."
+description: "Free local speech-to-text using MLX Whisper on Apple Silicon. Free, private, no API costs."
 metadata:
   openclaw:
     emoji: "🎤"
-    version: "1.0.0"
+    version: "1.1.0"
     author: "Community"
     repo: "https://github.com/ImpKind/local-whisper"
     requires:
@@ -20,83 +20,104 @@ metadata:
 
 # Local Whisper
 
-Fast, free, private speech-to-text transcription using MLX Whisper on Apple Silicon.
+**Free replacement for OpenAI Whisper API.** Runs 100% locally on Apple Silicon.
 
-## Why Local?
+## What It Replaces
 
-- **Free** — No API costs, runs 100% on your Mac
-- **Private** — Audio never leaves your machine
-- **Fast** — MLX optimized for Apple Silicon (~2-3s for voice messages)
-- **Multilingual** — Supports 99 languages + translation to English
+| Service | Cost | Privacy | This Skill |
+|---------|------|---------|------------|
+| OpenAI Whisper API | $0.006/min | Cloud | **Free, Local** |
+| Groq Whisper API | ~$0.001/min | Cloud | **Free, Local** |
+| AssemblyAI | $0.01/min | Cloud | **Free, Local** |
+
+**Same quality, zero cost, complete privacy.**
+
+## Performance
+
+- **~1 second** for typical voice messages (Apple Silicon)
+- Supports 99 languages
+- Translation to English included
 
 ## Quick Start
 
 ```bash
-# Install dependencies
+# 1. Install dependencies
 pip3 install -r requirements.txt
 
-# Start the daemon (pre-loads model)
+# 2. Start daemon (pre-loads model for instant transcription)
 python3 scripts/daemon.py
 
-# Transcribe
+# 3. Transcribe
 ./scripts/transcribe.sh audio.mp3
 ```
 
-## Daemon Mode
+## How It Works
 
-The daemon pre-loads the model for instant transcription:
+Uses [MLX Whisper](https://github.com/ml-explore/mlx-examples/tree/main/whisper) — Apple's ML framework optimized for Apple Silicon. The model runs on Neural Engine + GPU for maximum speed.
+
+### Daemon Mode (Recommended)
+
+The daemon keeps the model loaded in memory:
 
 ```bash
-# Start daemon (default: port 8787, model: medium)
+# Start once
 python3 scripts/daemon.py
 
-# Custom options
-python3 scripts/daemon.py --port 8787 --model distil-large-v3
+# Then transcribe instantly
+./scripts/transcribe.sh recording.mp3
 ```
 
-### Auto-start on Login
+### Direct Mode (No Daemon)
 
 ```bash
-# Copy the LaunchAgent
+# Loads model each time (~5s overhead)
+python3 scripts/transcriber_cli.py audio.mp3
+```
+
+## Auto-Start on Login
+
+```bash
 cp com.local-whisper.plist ~/Library/LaunchAgents/
 launchctl load ~/Library/LaunchAgents/com.local-whisper.plist
 ```
 
-## Scripts
+## API Endpoint
 
-| Script | Purpose |
-|--------|---------|
-| `transcribe.sh` | Quick transcription (uses daemon if running) |
-| `transcribe_large.sh` | Large files with distil-large-v3 model |
-| `daemon.py` | HTTP server for fast repeated transcription |
-
-## Models
-
-| Model | Size | Speed | Accuracy |
-|-------|------|-------|----------|
-| `medium` | 1.4GB | Fast | Good |
-| `distil-large-v3` | ~1.5GB | Medium | Better |
-| `large-v3` | 2.9GB | Slower | Best |
-
-Models download automatically on first use to `~/.cache/huggingface/`.
-
-## Requirements
-
-- macOS with Apple Silicon (M1/M2/M3)
-- Python 3.9+
-- ~2GB free RAM for medium model
-
-## Integration
-
-The daemon responds at `http://localhost:8787/transcribe`:
+When daemon is running:
 
 ```bash
 curl -X POST http://localhost:8787/transcribe \
-  -F "file=@audio.mp3" \
-  -F "language=en"
+  -F "file=@audio.mp3"
 ```
 
-Response: `{"text": "transcribed text", "language": "en"}`
+Response:
+```json
+{"text": "Hello world", "language": "en"}
+```
+
+## Translation
+
+Translate any language to English:
+
+```bash
+./scripts/transcribe.sh audio_spanish.mp3 --translate
+```
+
+## Models
+
+| Model | Speed | Accuracy | RAM |
+|-------|-------|----------|-----|
+| `medium` (default) | ~1s | Good | 1.5GB |
+| `distil-large-v3` | ~2s | Better | 1.5GB |
+| `large-v3` | ~3s | Best | 3GB |
+
+Models download automatically on first use.
+
+## Requirements
+
+- macOS with Apple Silicon (M1/M2/M3/M4)
+- Python 3.9+
+- ~2GB RAM
 
 ## License
 
