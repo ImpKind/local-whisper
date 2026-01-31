@@ -1,0 +1,15 @@
+# Models (users download their own)
+mlx_models/
+*.bin
+*.safetensors
+
+# Cache
+.cache/
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
